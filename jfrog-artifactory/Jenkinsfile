@@ -9,7 +9,6 @@ node {
     stage 'Configuracion Artifactory'
         rtGradle.tool = 'gradle-jenkins' // Como le asignamos al nombre de la herramienta en Jenkins en configuración
         rtGradle.deployer repo:'gradle-dev-local',  server: server
-        rtGradle.resolver repo:'example-repo-local', server: server
 
         stage('Configuracion buildInfo') {
             buildInfo.env.capture = true
