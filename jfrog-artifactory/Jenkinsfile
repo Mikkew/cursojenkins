@@ -1,5 +1,5 @@
 node {
-    def server = Artifactory.server('10.50.1.212:8082')
+    def server = Artifactory.server('artifactory')
     def rtGradle = Artifactory.newGradleBuild()
     def buildInfo = Artifactory.newBuildInfo()
     
@@ -7,7 +7,7 @@ node {
         git branch: 'main', url: 'https://github.com/Mikkew/gs-gradle'
 
     stage 'Configuracion Artifactory'
-        rtGradle.tool = 'gradle-jenkins' // Como le asignamos al nombre de la herramienta en Jenkins en configuración
+        rtGradle.tool = 'gradle7-jenkins' // Como le asignamos al nombre de la herramienta en Jenkins en configuración
         rtGradle.deployer repo:'gradle-dev-local',  server: server
         rtGradle.resolver repo:'example-repo-local', server: server
 
