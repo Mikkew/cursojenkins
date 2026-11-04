@@ -1,0 +1,41 @@
+node {
+  def myGradleContainer = docker.image('eclipse-temurin:8-jdk')
+
+  stage('Preparacion') {
+    git branch: 'main', url: 'https://github.com/Mikkew/gs-gradle'
+    myGradleContainer.pull()
+  }
+
+  stage('Construccion/Build') {
+    myGradleContainer.inside {
+      sh '''
+        cd complete
+        chmod +x gradlew
+        ./gradlew assemble --no-daemon -g "$WORKSPACE/.gradle"
+      '''
+    }
+  }
+
+  stage('Testeo') {
+    myGradleContainer.inside {
+      sh '''
+        cd complete
+        ./gradlew test --no-daemon -g "$WORKSPACE/.gradle"
+      '''
+    }
+  }
+
+  stage('Publicacion en Nexus') {
+    def jarFile = sh(script: 'ls complete/build/libs/gs-gradle-*.jar | head -1', returnStdout: true).trim()
+    nexusArtifactUploader(
+      nexusVersion: 'nexus3',
+      protocol: 'http',
+      nexusUrl: '10.30.0.6:8081',            // IP y puerto internos de Nexus, sin http://
+      groupId: 'cursojenkinsmac',
+      version: "1.0.${env.BUILD_NUMBER}",
+      repository: 'gradle-releases',
+      credentialsId: 'nexus',
+      artifacts: [[artifactId: 'gs-gradle', classifier: 'docker', file: jarFile, type: 'jar']]
+    )
+  }
+}
